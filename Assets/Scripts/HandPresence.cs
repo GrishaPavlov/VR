@@ -22,11 +22,6 @@ public class HandPresence : MonoBehaviour
         var devices = new List<InputDevice>();
         InputDevices.GetDevicesWithCharacteristics(controllerCharacteristics, devices);
 
-        foreach (var item in  devices)
-        {
-            Debug.Log(item.name + item.characteristics);
-        }
-
         if (devices.Count > 0)
         {
             _targetDevice = devices[0];
@@ -41,7 +36,6 @@ public class HandPresence : MonoBehaviour
     {
         _handAnimator.SetFloat("Grip", grip.action.ReadValue<float>());
         _handAnimator.SetFloat("Trigger", trigger.action.ReadValue<float>());
-        Debug.Log(grip.action.ReadValue<float>());
         // if (_targetDevice.TryGetFeatureValue(CommonUsages.trigger, out float triggerValue))
         // {
         //     _handAnimator.SetFloat("Trigger", triggerValue);

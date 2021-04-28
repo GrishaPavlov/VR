@@ -5,12 +5,14 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit;
 
-public class TeleportaionManager : MonoBehaviour
+public class TeleportationManager : MonoBehaviour
 {
     [SerializeField] private InputActionAsset actionAsset;
 
     [SerializeField] private XRRayInteractor _rayInteractor;
-
+    
+    [SerializeField] private LineRenderer _lineRenderer;
+    
     [SerializeField] private TeleportationProvider provider;
 
     private InputAction thumbstick;
@@ -21,7 +23,7 @@ public class TeleportaionManager : MonoBehaviour
     void Start()
     {
         _rayInteractor.enabled = false;
-        
+
         var activate = actionAsset.FindActionMap("XRI RightHand").FindAction("Teleport Mode Activate");
         activate.Enable();
         var cancel = actionAsset.FindActionMap("XRI RightHand").FindAction("Teleport Mode Cancel");
@@ -36,14 +38,12 @@ public class TeleportaionManager : MonoBehaviour
 
     private void OnTeleportActivate(InputAction.CallbackContext obj)
     {
-        _rayInteractor.enabled = true;
-        _isActive = true;
+        RayInteractorEnabled(true);
     }
 
     private void OnTeleportCancel(InputAction.CallbackContext obj)
     {
-        _rayInteractor.enabled = false;
-        _isActive = false;
+        RayInteractorEnabled(false);
     }
 
 
@@ -58,16 +58,25 @@ public class TeleportaionManager : MonoBehaviour
 
         if (!_rayInteractor.GetCurrentRaycastHit(out RaycastHit hit))
         {
-            _rayInteractor.enabled = false;
-            _isActive = false;
+            RayInteractorEnabled(false);
             return;
         }
-        
+
         var request = new TeleportRequest()
         {
             destinationPosition = hit.point,
         };
 
         provider.QueueTeleportRequest(request);
+        RayInteractorEnabled(false);
+
     }
+
+    private void RayInteractorEnabled(bool value)
+    {
+        _isActive = value;
+        _rayInteractor.enabled = value;
+        _lineRenderer.enabled = value;
+    }
+
 }
