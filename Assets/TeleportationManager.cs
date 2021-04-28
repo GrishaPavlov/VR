@@ -9,28 +9,28 @@ public class TeleportationManager : MonoBehaviour
 {
     [SerializeField] private InputActionAsset actionAsset;
 
-    [SerializeField] private XRRayInteractor _rayInteractor;
+    [SerializeField] private XRRayInteractor rayInteractor;
     
-    [SerializeField] private LineRenderer _lineRenderer;
+    [SerializeField] private LineRenderer lineRenderer;
     
     [SerializeField] private TeleportationProvider provider;
 
-    private InputAction thumbstick;
+    private InputAction _thumbstick;
 
     private bool _isActive;
 
     // Start is called before the first frame update
     void Start()
     {
-        _rayInteractor.enabled = false;
+        rayInteractor.enabled = false;
 
         var activate = actionAsset.FindActionMap("XRI RightHand").FindAction("Teleport Mode Activate");
         activate.Enable();
         var cancel = actionAsset.FindActionMap("XRI RightHand").FindAction("Teleport Mode Cancel");
         cancel.Enable();
 
-        thumbstick = actionAsset.FindActionMap("XRI RightHand").FindAction("Move");
-        thumbstick.Enable();
+        _thumbstick = actionAsset.FindActionMap("XRI RightHand").FindAction("Move");
+        _thumbstick.Enable();
 
         activate.performed += OnTeleportActivate;
         cancel.performed += OnTeleportCancel;
@@ -53,10 +53,10 @@ public class TeleportationManager : MonoBehaviour
         if (!_isActive)
             return;
 
-        if (thumbstick.triggered)
+        if (_thumbstick.triggered)
             return;
 
-        if (!_rayInteractor.GetCurrentRaycastHit(out RaycastHit hit))
+        if (!rayInteractor.GetCurrentRaycastHit(out RaycastHit hit))
         {
             RayInteractorEnabled(false);
             return;
@@ -75,8 +75,8 @@ public class TeleportationManager : MonoBehaviour
     private void RayInteractorEnabled(bool value)
     {
         _isActive = value;
-        _rayInteractor.enabled = value;
-        _lineRenderer.enabled = value;
+        rayInteractor.enabled = value;
+        lineRenderer.enabled = value;
     }
 
 }
