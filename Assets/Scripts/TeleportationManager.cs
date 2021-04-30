@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
@@ -10,30 +11,33 @@ public class TeleportationManager : MonoBehaviour
     [SerializeField] private InputActionAsset actionAsset;
 
     [SerializeField] private XRRayInteractor rayInteractor;
-    
-    [SerializeField] private LineRenderer lineRenderer;
-    
+
+    // [SerializeField] private LineRenderer lineRenderer;
+
     [SerializeField] private TeleportationProvider provider;
 
     private InputAction _thumbstick;
 
     private bool _isActive;
 
+    private InputAction _activate;
+    private InputAction _cancel;
+    
     // Start is called before the first frame update
-    void Start()
+    private void OnEnable()
     {
         rayInteractor.enabled = false;
 
-        var activate = actionAsset.FindActionMap("XRI RightHand").FindAction("Teleport Mode Activate");
-        activate.Enable();
-        var cancel = actionAsset.FindActionMap("XRI RightHand").FindAction("Teleport Mode Cancel");
-        cancel.Enable();
+        _activate = actionAsset.FindActionMap("XRI RightHand").FindAction("Teleport Mode Activate");
+        _activate.Enable();
+        _cancel = actionAsset.FindActionMap("XRI RightHand").FindAction("Teleport Mode Cancel");
+        _cancel.Enable();
 
         _thumbstick = actionAsset.FindActionMap("XRI RightHand").FindAction("Move");
         _thumbstick.Enable();
 
-        activate.performed += OnTeleportActivate;
-        cancel.performed += OnTeleportCancel;
+        _activate.performed += OnTeleportActivate;
+        _cancel.performed += OnTeleportCancel;
     }
 
     private void OnTeleportActivate(InputAction.CallbackContext obj)
@@ -50,10 +54,7 @@ public class TeleportationManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!_isActive)
-            return;
-
-        if (_thumbstick.triggered)
+        if (!_isActive || _thumbstick.triggered)
             return;
 
         if (!rayInteractor.GetCurrentRaycastHit(out RaycastHit hit))
@@ -61,22 +62,27 @@ public class TeleportationManager : MonoBehaviour
             RayInteractorEnabled(false);
             return;
         }
-
-        var request = new TeleportRequest()
+        if (hit.collider.gameObject.layer == 6)
         {
-            destinationPosition = hit.point,
-        };
-
-        provider.QueueTeleportRequest(request);
+            var request = new TeleportRequest()
+            {
+                destinationPosition = hit.point,
+            };
+            provider.QueueTeleportRequest(request);
+        }
         RayInteractorEnabled(false);
-
     }
 
     private void RayInteractorEnabled(bool value)
     {
         _isActive = value;
         rayInteractor.enabled = value;
-        lineRenderer.enabled = value;
+        // lineRenderer.enabled = value;
     }
 
+    private void OnDisable()
+    {
+        _activate.performed -= OnTeleportActivate;
+        _cancel.performed -= OnTeleportCancel;
+    }
 }
